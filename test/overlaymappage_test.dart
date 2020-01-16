@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:first_app/ui/pages/map/index.dart';
 import 'package:first_app/models/locstate.dart';
 import 'package:first_app/generated/i18n.dart';
@@ -33,7 +34,7 @@ dynamic initWidget(WidgetTester tester, LocStateModel state) {
 void main() async {
   var state = LocStateModel();
   // Test location Oslo, Norway
-  state.setLocation(59.893777, 10.7150951);
+  state.addLocation(Position(latitude: 59.893777, longitude: 10.7150951));
   testWidgets('OverlayMapPage', (WidgetTester tester) async {
     await initWidget(tester, state);
 
