@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:first_app/generated/i18n.dart';
-import 'package:first_app/models/appstate.dart';
+import 'package:first_app/models/locstate.dart';
 
 class LocationStreamWidget extends StatefulWidget {
   @override
@@ -10,39 +11,6 @@ class LocationStreamWidget extends StatefulWidget {
 }
 
 class _LocationStreamState extends State<LocationStreamWidget> {
-  StreamSubscription<Position> _positionStreamSubscription;
-  final List<Position> _positions = <Position>[];
-
-  void _toggleListening() {
-    if (_positionStreamSubscription == null) {
-      const LocationOptions locationOptions =
-          LocationOptions(accuracy: LocationAccuracy.best, distanceFilter: 10);
-      final Stream<Position> positionStream =
-          Geolocator().getPositionStream(locationOptions);
-      _positionStreamSubscription = positionStream.listen(
-          (Position position) => setState(() => _positions.add(position)));
-      _positionStreamSubscription.pause();
-    }
-
-    setState(() {
-      if (_positionStreamSubscription.isPaused) {
-        _positionStreamSubscription.resume();
-      } else {
-        _positionStreamSubscription.pause();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    if (_positionStreamSubscription != null) {
-      _positionStreamSubscription.cancel();
-      _positionStreamSubscription = null;
-    }
-
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<GeolocationStatus>(
@@ -62,36 +30,26 @@ class _LocationStreamState extends State<LocationStreamWidget> {
         title: RaisedButton(
           elevation: 20,
           textTheme: ButtonTextTheme.primary,
-          child: _buildButtonText(),
-          color: _determineButtonColor(context),
+          child: Text(Provider.of<LocStateModel>(context).isListening()
+              ? S.of(context).stopListening
+              : S.of(context).startListening),
+          color: Provider.of<LocStateModel>(context).isListening()
+              ? Theme.of(context).primaryColorDark
+              : Theme.of(context).primaryColorLight,
           padding: const EdgeInsets.all(8.0),
-          onPressed: _toggleListening,
+          onPressed: Provider.of<LocStateModel>(context).toggleListening,
         ),
       ),
     ];
 
-    listItems.addAll(_positions
+    listItems.addAll(Provider.of<LocStateModel>(context)
+        .positions
         .map((Position position) => PositionListItem(position))
         .toList());
 
     return ListView(
       children: listItems,
     );
-  }
-
-  bool _isListening() => !(_positionStreamSubscription == null ||
-      _positionStreamSubscription.isPaused);
-
-  Widget _buildButtonText() {
-    return Text(_isListening()
-        ? S.of(context).stopListening
-        : S.of(context).startListening);
-  }
-
-  Color _determineButtonColor(BuildContext context) {
-    return _isListening()
-        ? Theme.of(context).primaryColorDark
-        : Theme.of(context).primaryColorLight;
   }
 }
 
@@ -112,9 +70,6 @@ class PositionListItemState extends State<PositionListItem> {
 
   @override
   Widget build(BuildContext context) {
-    var appState = AppStateModel.of(context, true);
-    appState.setLocation(_position.latitude, _position.longitude);
-
     final tiles = ListTile(
       onTap: _onTap,
       contentPadding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0),
