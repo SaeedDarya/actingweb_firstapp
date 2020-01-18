@@ -48,13 +48,8 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-class AuthPage extends StatefulWidget {
-  @override
-  _AuthPageState createState() => _AuthPageState();
-}
-
-class _AuthPageState extends State<AuthPage> {
-  void auth() {
+class AuthPage extends StatelessWidget {
+  void auth(BuildContext context) {
     var auth0 = Auth0Client(
         authClient: Provider.of<AppStateModel>(context, listen: false)
             .mocks
@@ -80,7 +75,7 @@ class _AuthPageState extends State<AuthPage> {
             borderRadius: BorderRadius.circular(24),
           ),
           onPressed: () {
-            auth();
+            auth(context);
           },
           padding: EdgeInsets.all(12),
           child: Text(S.of(context).loginButton),
