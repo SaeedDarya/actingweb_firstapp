@@ -4,12 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:first_app/generated/i18n.dart';
 import 'package:first_app/models/locstate.dart';
 
-class LocationStreamWidget extends StatefulWidget {
-  @override
-  State<LocationStreamWidget> createState() => _LocationStreamState();
-}
-
-class _LocationStreamState extends State<LocationStreamWidget> {
+class LocationStreamWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
@@ -51,44 +46,13 @@ class _LocationStreamState extends State<LocationStreamWidget> {
   }
 }
 
-class PositionListItem extends StatefulWidget {
+class PositionListItem extends StatelessWidget {
   const PositionListItem(this._position);
 
   final Position _position;
 
   @override
-  State<PositionListItem> createState() => PositionListItemState(_position);
-}
-
-class PositionListItemState extends State<PositionListItem> {
-  PositionListItemState(this._position);
-
-  final Position _position;
-
-  @override
   Widget build(BuildContext context) {
-    final tiles = ListTile(
-      contentPadding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0),
-      title: Text(
-        S.of(context).latitudeLongitude(
-            _position.latitude.toString(), _position.longitude.toString()),
-      ),
-      subtitle: Row(
-        children: <Widget>[
-          Icon(Icons.arrow_right),
-          Expanded(
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Text(Provider.of<LocStateModel>(context)
-                      .getAddressString(_position)),
-                ]),
-          ),
-        ],
-      ),
-    );
-
     return Container(
       padding:
           const EdgeInsets.only(left: 10.0, bottom: 2.0, top: 2.0, right: 10.0),
@@ -102,7 +66,28 @@ class PositionListItemState extends State<PositionListItem> {
             bottom: 2.0,
             left: 2.0,
           ),
-          child: tiles,
+          child: ListTile(
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0),
+            title: Text(
+              S.of(context).latitudeLongitude(_position.latitude.toString(),
+                  _position.longitude.toString()),
+            ),
+            subtitle: Row(
+              children: <Widget>[
+                Icon(Icons.arrow_right),
+                Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Text(Provider.of<LocStateModel>(context)
+                            .getAddressString(_position)),
+                      ]),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
