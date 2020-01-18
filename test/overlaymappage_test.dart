@@ -32,6 +32,10 @@ dynamic initWidget(WidgetTester tester, LocStateModel state) {
 }
 
 void main() async {
+  // Since locstate tries to find a placemark and thus uses geolocation, which again uses
+  // underlying system, we need to make sure everything is initialised
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   var state = LocStateModel();
   // Test location Oslo, Norway
   state.addLocation(Position(latitude: 59.893777, longitude: 10.7150951));
