@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
@@ -13,10 +12,9 @@ class LocationStreamWidget extends StatefulWidget {
 class _LocationStreamState extends State<LocationStreamWidget> {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<GeolocationStatus>(
-        future: Geolocator().checkGeolocationPermissionStatus(),
-        builder:
-            (BuildContext context, AsyncSnapshot<GeolocationStatus> snapshot) {
+    return FutureBuilder<bool>(
+        future: Provider.of<LocStateModel>(context).available(),
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -66,12 +64,10 @@ class PositionListItemState extends State<PositionListItem> {
   PositionListItemState(this._position);
 
   final Position _position;
-  String _address = '';
 
   @override
   Widget build(BuildContext context) {
     final tiles = ListTile(
-      onTap: _onTap,
       contentPadding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0),
       title: Text(
         S.of(context).latitudeLongitude(
@@ -79,13 +75,14 @@ class PositionListItemState extends State<PositionListItem> {
       ),
       subtitle: Row(
         children: <Widget>[
-          Icon(Icons.expand_more),
+          Icon(Icons.arrow_right),
           Expanded(
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
-                  Text(_address),
+                  Text(Provider.of<LocStateModel>(context)
+                      .getAddressString(_position)),
                 ]),
           ),
         ],
@@ -109,36 +106,5 @@ class PositionListItemState extends State<PositionListItem> {
         ),
       ),
     );
-  }
-
-  Future<void> _onTap() async {
-    String address = S.of(context).unknown;
-    final List<Placemark> placemarks = await Geolocator()
-        .placemarkFromCoordinates(_position.latitude, _position.longitude);
-
-    if (placemarks != null && placemarks.isNotEmpty) {
-      address = _buildAddressString(placemarks.first);
-    }
-
-    setState(() {
-      _address = '$address';
-    });
-  }
-
-  static String _buildAddressString(Placemark placemark) {
-    final String name = placemark.name ?? '';
-    final String street = placemark.thoroughfare ?? '';
-    final String streetnumber = placemark.subThoroughfare ?? '';
-    final String city = placemark.locality ?? '';
-    final String state = placemark.administrativeArea ?? '';
-    final String country = placemark.country ?? '';
-
-    String address;
-    if (state == city) {
-      address = '$name, $streetnumber $street, $city, $country';
-    } else {
-      address = '$name, $streetnumber $street, $city, $state, $country';
-    }
-    return address;
   }
 }
